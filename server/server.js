@@ -11,14 +11,167 @@ app.get("/api/health", (req, res) =>{
     res.json({status: "ok"});
 });
 
-//TEST route
-app.get("/api/test-db", (req, res) => {
+//POST route
+app.post("/api/capsules", (req, res) => {
+  const {
+    project_name,
+    prompt_title,
+    prompt_version,
+    prompt_text,
+    response_summary,
+    category,
+    usefulness,
+    reviewed,
+    improved,
+    screenshot_url,
+    notes
+  } = req.body;
+
+  const sql = `
+    INSERT INTO capsules (
+      user_id,
+      project_name,
+      prompt_title,
+      prompt_version,
+      prompt_text,
+      response_summary,
+      category,
+      usefulness,
+      reviewed,
+      improved,
+      screenshot_url,
+      notes
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.run(
+    sql,
+    [
+      "test-user",
+      project_name,
+      prompt_title,
+      prompt_version,
+      prompt_text,
+      response_summary,
+      category,
+      usefulness,
+      reviewed,
+      improved,
+      screenshot_url,
+      notes
+    ],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          error: err.message
+        });
+      }
+
+      res.status(201).json({
+        message: "Capsule created",
+        id: this.lastID
+      });
+    }
+  );
+});
+
+//Get route
+app.get("/api/capsules", (req, res) => {
     db.all("SELECT * FROM capsules", [], (err,rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
         res.json(rows);
     });
+});
+
+//PUT
+app.put("/api/capsules/:id", (req, res) => {
+  const { id } = req.params;
+
+  const {
+    project_name,
+    prompt_title,
+    prompt_version,
+    prompt_text,
+    response_summary,
+    category,
+    usefulness,
+    reviewed,
+    improved,
+    screenshot_url,
+    notes
+  } = req.body;
+
+  const sql = `
+    UPDATE capsules
+    SET
+      project_name = ?,
+      prompt_title = ?,
+      prompt_version = ?,
+      prompt_text = ?,
+      response_summary = ?,
+      category = ?,
+      usefulness = ?,
+      reviewed = ?,
+      improved = ?,
+      screenshot_url = ?,
+      notes = ?
+    WHERE id = ?
+  `;
+
+  db.run(
+    sql,
+    [
+      project_name,
+      prompt_title,
+      prompt_version,
+      prompt_text,
+      response_summary,
+      category,
+      usefulness,
+      reviewed,
+      improved,
+      screenshot_url,
+      notes,
+      id
+    ],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          error: err.message
+        });
+      }
+
+      res.json({
+        message: "Capsule updated",
+        changes: this.changes
+      });
+    }
+  );
+});
+
+//DELETE
+app.delete("/api/capsules/:id", (req, res) => {
+  const { id } = req.params;
+
+  db.run(
+    "DELETE FROM capsules WHERE id = ?",
+    [id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({
+          error: err.message
+        });
+      }
+
+      res.json({
+        message: "Capsule deleted",
+        changes: this.changes
+      });
+    }
+  );
 });
 
 const PORT = 5000;
