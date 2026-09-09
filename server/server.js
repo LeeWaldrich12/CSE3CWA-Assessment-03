@@ -13,6 +13,7 @@ app.get("/api/health", (req, res) =>{
 
 //POST route
 app.post("/api/capsules", (req, res) => {
+  console.log(req.body);
   const {
     project_name,
     prompt_title,
