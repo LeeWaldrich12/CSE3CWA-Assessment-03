@@ -1,11 +1,23 @@
+require("dotenv").config();
+
 const db = require("./database");
 const cors = require("cors");
 const express = require("express");
+const passport = require("./passport");
+const session = require("express-session");
 
 const app = express();
 
+
 app.use(cors());
 app.use(express.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.get("/api/health", (req, res) =>{
     res.json({status: "ok"});
@@ -174,6 +186,23 @@ app.delete("/api/capsules/:id", (req, res) => {
     }
   );
 });
+
+// GitHub OAuth routes
+app.get(
+  "/auth/github",
+  passport.authenticate("github", {
+    scope: ["user:email"],
+  })
+);
+
+//callback
+app.get("/auth/github/callback", passport.authenticate("github", {
+    failureRedirect: "/login",
+  }),
+  (req, res) => {
+    res.send("GitHub Login Successful");
+  } 
+);
 
 const PORT = 5000;
 
