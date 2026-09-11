@@ -5,12 +5,15 @@ const cors = require("cors");
 const express = require("express");
 const passport = require("./passport");
 const session = require("express-session");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -196,13 +199,32 @@ app.get(
 );
 
 //callback
-app.get("/auth/github/callback", passport.authenticate("github", {
-    failureRedirect: "/login",
-  }),
+app.get( 
+  "/auth/github/callback", passport.authenticate("github", { 
+    failureRedirect: "/login", 
+  }), 
   (req, res) => {
-    res.send("GitHub Login Successful");
+    const token = jwt.sign( { 
+      id: String(req.user.id), 
+      username: req.user.username, 
+    }, 
+    process.env.JWT_SECRET, 
+    { 
+      expiresIn: "1h", 
+    } 
+  ); 
+
+res.cookie("token", token, { 
+  httpOnly: true, 
+  secure: process.env.NODE_ENV === "production", 
+  sameSite: "lax", 
+  maxAge: 60 * 60 * 1000, 
+}); 
+
+    res.send("GitHub Login Successful. JWT cookie created."); 
   } 
 );
+
 
 const PORT = 5000;
 
