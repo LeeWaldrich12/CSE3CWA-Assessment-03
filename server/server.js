@@ -7,11 +7,16 @@ const passport = require("./passport");
 const session = require("express-session");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const authenticateToken = require("./authMiddleware");
 
 const app = express();
 
 
-app.use(cors());
+//app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(session({
@@ -27,7 +32,7 @@ app.get("/api/health", (req, res) =>{
 });
 
 //POST route
-app.post("/api/capsules", (req, res) => {
+app.post("/api/capsules", authenticateToken, (req, res) => {
   console.log(req.body);
   const {
     project_name,
@@ -64,7 +69,7 @@ app.post("/api/capsules", (req, res) => {
   db.run(
     sql,
     [
-      "test-user",
+      req.user.id,
       project_name,
       prompt_title,
       prompt_version,
@@ -93,8 +98,8 @@ app.post("/api/capsules", (req, res) => {
 });
 
 //Get route
-app.get("/api/capsules", (req, res) => {
-    db.all("SELECT * FROM capsules", [], (err,rows) => {
+app.get("/api/capsules", authenticateToken, (req, res) => {
+    db.all("SELECT * FROM capsules WHERE user_id = ? ORDER BY created_at DESC", [req.user.id], (err,rows) => {
         if (err) {
             return res.status(500).json({ error: err.message });
         }
@@ -103,7 +108,7 @@ app.get("/api/capsules", (req, res) => {
 });
 
 //PUT
-app.put("/api/capsules/:id", (req, res) => {
+app.put("/api/capsules/:id", authenticateToken, (req, res) => {
   const { id } = req.params;
 
   const {
@@ -134,7 +139,7 @@ app.put("/api/capsules/:id", (req, res) => {
       improved = ?,
       screenshot_url = ?,
       notes = ?
-    WHERE id = ?
+    WHERE id = ? AND user_id = ?
   `;
 
   db.run(
@@ -151,12 +156,19 @@ app.put("/api/capsules/:id", (req, res) => {
       improved,
       screenshot_url,
       notes,
-      id
+      id,
+      req.user.id
     ],
     function (err) {
       if (err) {
         return res.status(500).json({
           error: err.message
+        });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({
+          message: "Capsule not found"
         });
       }
 
@@ -169,16 +181,22 @@ app.put("/api/capsules/:id", (req, res) => {
 });
 
 //DELETE
-app.delete("/api/capsules/:id", (req, res) => {
+app.delete("/api/capsules/:id", authenticateToken, (req, res) => {
   const { id } = req.params;
 
   db.run(
-    "DELETE FROM capsules WHERE id = ?",
-    [id],
+    "DELETE FROM capsules WHERE id = ? AND user_id = ?",
+    [id, req.user.id],
     function (err) {
       if (err) {
         return res.status(500).json({
           error: err.message
+        });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({
+          message: "Capsule not found"
         });
       }
 

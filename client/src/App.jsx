@@ -11,6 +11,7 @@ function App() {
     const response = await fetch(
 `http://localhost:5000/api/capsules`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -35,7 +36,11 @@ function App() {
   };
 
   const loadCapsules = async () => {
-    const response = await fetch('http://localhost:5000/api/capsules');
+    const response = await fetch('http://localhost:5000/api/capsules', {
+      credentials: 'include', // Include credentials for cookie-based authentication
+    }
+
+    );
     const data = await response.json();
     setCapsules(data);
   };
@@ -47,6 +52,7 @@ function App() {
   const deleteCapsule = async (id) => {
     await fetch(`http://localhost:5000/api/capsules/${id}`, {
       method: 'DELETE',
+      credentials: 'include', 
     });
     loadCapsules();
   };
@@ -54,6 +60,7 @@ function App() {
   const updateCapsule = async (id) => {
     await fetch(`http://localhost:5000/api/capsules/${id}`, {
       method: 'PUT',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
