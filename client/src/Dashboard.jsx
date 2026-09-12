@@ -16,7 +16,31 @@ const [screenshotUrl, setScreenshotUrl] = useState('');
 const [notes, setNotes] = useState('');
 const[editingId, setEditingId] = useState(null);
 
+const resetForm = () => {
+    setProjectName('');
+    setTitle('');
+    setPromptText('');
+    setPromptVersion('v1');
+    setResponseSummary('');
+    setCategory('Coding');
+    setUsefulness('Good');
+    setReviewed(false);
+    setImproved(false);
+    setScreenshotUrl('');
+    setNotes('');
+    setEditingId(null);
+}
+
 const createCapsule = async () => {
+    if(
+    !projectName.trim() ||
+    !title.trim() ||
+    !promptText.trim()
+) {
+    alert('Project name, title, and prompt text are required fields.');
+    return;
+}
+
     const response = await fetch(
 `http://localhost:5000/api/capsules`, {
         method: 'POST',
@@ -40,7 +64,7 @@ const createCapsule = async () => {
     });
 
     const data = await response.json();
-    console.log('Capsule created:', data);
+    resetForm();
     loadCapsules();
 };
 
@@ -82,6 +106,15 @@ const editCapsule = (capsule) => {
 };
 
 const updateCapsule = async () => {
+    
+if(
+    !projectName.trim() ||
+    !title.trim() ||
+    !promptText.trim()
+) {
+    alert('Project name, title, and prompt text are required fields.');
+    return;
+}
     await fetch(`http://localhost:5000/api/capsules/${editingId}`, {
         method: 'PUT',
         credentials: 'include',
@@ -102,8 +135,16 @@ const updateCapsule = async () => {
         notes: notes,
         }),
     });
-    setEditingId(null);
+    resetForm();
     loadCapsules();
+};
+
+const logout = async () => {
+    await fetch('http://localhost:5000/api/logout', {
+        method: 'POST',
+        credentials: 'include',
+    });
+    window.location.href = '/login'; // Redirect to login page after logout
 };
 
 return (
@@ -198,6 +239,10 @@ return (
         </div>
     ))}
     </div>
+
+    <button onClick={logout}>
+        Logout
+    </button>
 
     </div>
 );

@@ -12,7 +12,6 @@ const authenticateToken = require("./authMiddleware");
 const app = express();
 
 
-//app.use(cors());
 app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
@@ -252,6 +251,16 @@ res.cookie("token", token, {
 
 
 const PORT = 5000;
+
+app.post("/api/logout", (req, res) => {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+    res.json({ message: "Logged out successfully" });
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);
