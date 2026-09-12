@@ -31,6 +31,13 @@ app.get("/api/health", (req, res) =>{
     res.json({status: "ok"});
 });
 
+app.get("/api/auth/me", authenticateToken, (req, res) => {
+    res.json({ 
+      authenticated: true, 
+      user: req.user, 
+    });
+});
+
 //POST route
 app.post("/api/capsules", authenticateToken, (req, res) => {
   console.log(req.body);
@@ -239,7 +246,7 @@ res.cookie("token", token, {
   maxAge: 60 * 60 * 1000, 
 }); 
 
-    res.send("GitHub Login Successful. JWT cookie created."); 
+    res.redirect("http://localhost:5173/dashboard"); 
   } 
 );
 

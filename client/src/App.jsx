@@ -1,123 +1,52 @@
-import { useState, useEffect } from 'react'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+} from "react-router-dom";
+import Dashboard from './Dashboard';
+import ProtectedRoute from './ProtectedRoute';
+
+function Landing() {
+  return (
+    <div>
+      <h1> AI Capsule</h1>
+      
+      <p>
+        Save,review and improve your useful AI prompts.
+      </p>
+
+      <Link to ="/login">Login</Link>
+      </div>
+  );
+}
+
+function Login() {
+  const loginWithGitHub = () => {
+    window.location.href = "http://localhost:5000/auth/github";
+  };
+
+  return(
+    <div>
+      <h1>Login</h1>
+      <button onClick={loginWithGitHub}>Login with GitHub</button>
+    </div>
+  );
+}
 
 function App() {
-
-  const [projectName, setProjectName] = useState('')
-  const [title, setTitle] = useState('')
-  const[propmtText, setPromptText] = useState('')
-  const [capsules, setCapsules] = useState([]);
-
-  const createCapsule = async () => {
-    const response = await fetch(
-`http://localhost:5000/api/capsules`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        project_name: projectName,
-        prompt_title: title,
-        prompt_version: "v1",
-        prompt_text: propmtText,
-        response_summary:"",
-        category:"Coding",
-        usefulness: "Good",
-        reviewed: 0,
-        improved: 0,
-        screenshot_url: "",
-        notes: "",
-      }),
-    });
-
-    const data = await response.json();
-    console.log('Capsule created:', data);
-    loadCapsules();
-  };
-
-  const loadCapsules = async () => {
-    const response = await fetch('http://localhost:5000/api/capsules', {
-      credentials: 'include', // Include credentials for cookie-based authentication
-    }
-
-    );
-    const data = await response.json();
-    setCapsules(data);
-  };
-
-  useEffect(() => {
-    loadCapsules();
-  }, []);
-
-  const deleteCapsule = async (id) => {
-    await fetch(`http://localhost:5000/api/capsules/${id}`, {
-      method: 'DELETE',
-      credentials: 'include', 
-    });
-    loadCapsules();
-  };
-
-  const updateCapsule = async (id) => {
-    await fetch(`http://localhost:5000/api/capsules/${id}`, {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        project_name: projectName,
-        prompt_title: title,
-        prompt_version: "v1",
-        prompt_text: propmtText,
-        response_summary:"",
-        category:"Coding",
-        usefulness: "Good",
-        reviewed: 0,
-        improved: 0,
-        screenshot_url: "",
-        notes: "",
-      }),
-    });
-    loadCapsules();
-  };
-
   return (
-  <div>
-    <h1>AI Capsule Dashboard</h1>
-
-    <div>
-      <input placeholder="Project name" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
-    </div>
-
-    <div>
-      <input placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
-    </div>
-
-    <div>
-      <input placeholder="Prompt text" value={propmtText} onChange={(e) => setPromptText(e.target.value)} />
-    </div>
-
-    <div>
-      <button onClick={createCapsule}>Create Capsule</button>
-    </div>
-
-    <div>
-      {capsules.map((capsule) => (
-        <div key={capsule.id}>
-          {capsule.project_name} - {capsule.prompt_title}
-          <br />
-          <button onClick={() => updateCapsule(capsule.id)}>Update</button>
-          <br />
-          <button onClick={() => deleteCapsule(capsule.id)}
-          >
-            Delete
-          </button>
-          
-        </div>
-      ))}
-    </div>
-
-  </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
