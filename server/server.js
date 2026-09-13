@@ -1,4 +1,5 @@
-require("dotenv").config();
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const db = require("./database");
 const cors = require("cors");
@@ -8,6 +9,7 @@ const session = require("express-session");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const authenticateToken = require("./authMiddleware");
+
 
 const app = express();
 
@@ -245,12 +247,13 @@ res.cookie("token", token, {
   maxAge: 60 * 60 * 1000, 
 }); 
 
-    res.redirect("http://localhost:5173/dashboard"); 
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    res.redirect(`${clientUrl}/dashboard`);
   } 
 );
 
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.post("/api/logout", (req, res) => {
     res.clearCookie("token", {
@@ -261,6 +264,22 @@ app.post("/api/logout", (req, res) => {
     res.json({ message: "Logged out successfully" });
 });
 
+if (process.env.NODE_ENV === "production") {
+  const clientDistPath = path.join(
+    __dirname, 
+    "../client/dist"
+  );
+
+  app.use(express.static(clientDistPath));
+
+  app.use((req, res) => {
+    if(req.method !== "GET"){
+      return next();
+    }
+
+    res.sendFile(path.join(clientDistPath, "index.html"));
+  });
+}
 
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);

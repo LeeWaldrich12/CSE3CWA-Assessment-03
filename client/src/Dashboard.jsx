@@ -42,7 +42,7 @@ const createCapsule = async () => {
 }
 
     const response = await fetch(
-`http://localhost:5000/api/capsules`, {
+`/api/capsules`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -69,7 +69,7 @@ const createCapsule = async () => {
 };
 
 const loadCapsules = async () => {
-    const response = await fetch('http://localhost:5000/api/capsules', {
+    const response = await fetch('/api/capsules', {
       credentials: 'include', // Include credentials for cookie-based authentication
     }
 
@@ -83,7 +83,7 @@ useEffect(() => {
 }, []);
 
 const deleteCapsule = async (id) => {
-    await fetch(`http://localhost:5000/api/capsules/${id}`, {
+    await fetch(`/api/capsules/${id}`, {
         method: 'DELETE',
         credentials: 'include', 
     });
@@ -115,7 +115,7 @@ if(
     alert('Project name, title, and prompt text are required fields.');
     return;
 }
-    await fetch(`http://localhost:5000/api/capsules/${editingId}`, {
+    await fetch(`/api/capsules/${editingId}`, {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -140,7 +140,7 @@ if(
 };
 
 const logout = async () => {
-    await fetch('http://localhost:5000/api/logout', {
+    await fetch('/api/logout', {
         method: 'POST',
         credentials: 'include',
     });

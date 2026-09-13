@@ -23,7 +23,7 @@ function Landing() {
 
 function Login() {
   const loginWithGitHub = () => {
-    window.location.href = "http://localhost:5000/auth/github";
+    window.location.href = "/auth/github";
   };
 
   return(
