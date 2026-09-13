@@ -7,12 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-.env
-capsule.db
+node_modules/ 
+**/node_modules/
+.env 
+**/.env 
+dist/ 
+**/dist/ 
+capsules.db 
 *.db
 
 # Editor directories and files
